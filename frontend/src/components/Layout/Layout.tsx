@@ -2,7 +2,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
 import { authHooks } from "../../hooks/useAuth";
-import { Button } from "../Button";
 
 type LayoutProps = {
   children: ReactNode;
@@ -16,14 +15,23 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { to: "/categories", label: "Categorias" },
 ];
 
-const linkClass = ({ isActive }: { isActive: boolean }) => {
-  const base = "block rounded-md px-3 py-2 text-sm font-medium transition";
-  if (isActive) return `${base} bg-slate-900 text-white`;
-  return `${base} text-slate-700 hover:bg-slate-200`;
+const LOGO_SRC = "/icons/logo.svg";
+
+const NAV_LINK_CLASS =
+  "text-sm leading-5 transition " +
+  "data-[active=true]:font-semibold data-[active=true]:text-[#1f6f43] " +
+  "data-[active=false]:font-normal data-[active=false]:text-[#4b5563] hover:data-[active=false]:text-[#111827]";
+
+const getInitials = (name: string | undefined): string => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return `${first}${last}`.toUpperCase();
 };
 
 export function Layout({ children }: LayoutProps) {
-  const { user, signout, signoutLoading } = authHooks.use();
+  const { user, signout } = authHooks.use();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -32,45 +40,38 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <aside className="flex w-64 flex-col justify-between border-r border-slate-200 bg-white p-6">
-        <div className="space-y-8">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Finanças</h1>
-            <p className="text-xs text-slate-500">Seu dinheiro, organizado</p>
-          </div>
+    <div className="flex min-h-screen flex-col bg-[#f8f9fa]">
+      <header className="w-full border-b border-[#e5e7eb] bg-white pb-[17px] pt-[16px]">
+        <div className="relative mx-auto flex max-w-[1280px] items-center justify-between px-12">
+          <img src={LOGO_SRC} alt="Financy" className="h-6 w-auto" />
 
-          <nav className="space-y-1">
+          <nav className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-5">
             {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={linkClass}
-              >
-                {item.label}
+              <NavLink key={item.to} to={item.to} end={item.end}>
+                {({ isActive }) => (
+                  <span data-active={isActive} className={NAV_LINK_CLASS}>
+                    {item.label}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
-        </div>
 
-        <div className="space-y-3 border-t border-slate-200 pt-4">
-          <div>
-            <p className="text-sm font-medium text-slate-900">{user?.name}</p>
-            <p className="text-xs text-slate-500">{user?.email}</p>
-          </div>
-          <Button
-            variant="secondary"
-            fullWidth
-            loading={signoutLoading}
+          <button
+            type="button"
             onClick={handleSignOut}
+            title={user?.email ?? "Sair"}
+            aria-label="Sair"
+            className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-[#d1d5db] text-sm font-medium leading-5 text-[#111827] transition hover:opacity-90"
           >
-            Sair
-          </Button>
+            {getInitials(user?.name)}
+          </button>
         </div>
-      </aside>
+      </header>
 
-      <main className="flex-1 overflow-x-hidden p-8">{children}</main>
+      <main className="flex-1 overflow-x-hidden">
+        <div className="mx-auto w-full max-w-[1280px] p-12">{children}</div>
+      </main>
     </div>
   );
 }

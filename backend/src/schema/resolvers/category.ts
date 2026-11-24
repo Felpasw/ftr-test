@@ -28,6 +28,66 @@ export const categoryResolvers = {
       const userId = requireAuth(ctx.userId);
       return findOwned(ctx, userId, id);
     },
+    categoriesOverview: async (_: unknown, __: unknown, ctx: Context) => {
+      const userId = requireAuth(ctx.userId);
+      const [totalCategories, totalTransactions, topGroup] = await Promise.all([
+        ctx.prisma.category.count({ where: { userId } }),
+        ctx.prisma.transaction.count({ where: { userId } }),
+        ctx.prisma.transaction.groupBy({
+          by: ["categoryId"],
+          where: { userId, categoryId: { not: null } },
+          _count: { _all: true },
+          orderBy: { _count: { categoryId: "desc" } },
+          take: 1,
+        }),
+      ]);
+
+      const topRow = topGroup[0];
+      const mostUsed =
+        topRow?.categoryId
+          ? await ctx.prisma.category.findFirst({
+              where: { id: topRow.categoryId, userId },
+            })
+          : null;
+
+      return { totalCategories, totalTransactions, mostUsed };
+    },
+    categoryStats: async (_: unknown, __: unknown, ctx: Context) => {
+      const userId = requireAuth(ctx.userId);
+      const [categories, aggregates] = await Promise.all([
+        ctx.prisma.category.findMany({
+          where: { userId },
+          orderBy: { createdAt: "asc" },
+        }),
+        ctx.prisma.transaction.groupBy({
+          by: ["categoryId"],
+          where: { userId, categoryId: { not: null } },
+          _count: { _all: true },
+          _sum: { amount: true },
+        }),
+      ]);
+
+      const statsByCategory = new Map<
+        string,
+        { count: number; sum: number }
+      >();
+      for (const row of aggregates) {
+        if (!row.categoryId) continue;
+        statsByCategory.set(row.categoryId, {
+          count: row._count._all,
+          sum: row._sum.amount ?? 0,
+        });
+      }
+
+      return categories.map((category) => {
+        const stat = statsByCategory.get(category.id);
+        return {
+          category,
+          transactionCount: stat?.count ?? 0,
+          totalAmount: stat?.sum ?? 0,
+        };
+      });
+    },
   },
   Mutation: {
     createCategory: (_: unknown, { input }: CreateArgs, ctx: Context) => {

@@ -4,7 +4,11 @@ import {
   DELETE_CATEGORY_MUTATION,
   UPDATE_CATEGORY_MUTATION,
 } from "./graphql/mutations";
-import { CATEGORIES_QUERY } from "./graphql/queries";
+import {
+  CATEGORIES_OVERVIEW_QUERY,
+  CATEGORIES_QUERY,
+  CATEGORY_STATS_QUERY,
+} from "./graphql/queries";
 import type {
   Category,
   CreateCategoryInput,
@@ -17,7 +21,11 @@ import type {
  * tela gerenciar `refetchQueries`, concentra aqui porque é parte do contrato:
  * criar/editar/deletar categoria SEMPRE refaz `categories`.
  */
-const REFETCH = [{ query: CATEGORIES_QUERY }];
+const REFETCH = [
+  { query: CATEGORIES_QUERY },
+  { query: CATEGORY_STATS_QUERY },
+  { query: CATEGORIES_OVERVIEW_QUERY },
+];
 
 class CategoryService implements ICategoryService {
   async create(input: CreateCategoryInput): Promise<Category> {

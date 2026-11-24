@@ -5,6 +5,8 @@ import {
   UPDATE_TRANSACTION_MUTATION,
 } from "./graphql/mutations";
 import {
+  CATEGORIES_OVERVIEW_QUERY,
+  CATEGORY_STATS_QUERY,
   TRANSACTIONS_QUERY,
   TRANSACTIONS_SUMMARY_QUERY,
 } from "./graphql/queries";
@@ -22,6 +24,8 @@ import type {
 const REFETCH = [
   { query: TRANSACTIONS_QUERY },
   { query: TRANSACTIONS_SUMMARY_QUERY },
+  { query: CATEGORY_STATS_QUERY },
+  { query: CATEGORIES_OVERVIEW_QUERY },
 ];
 
 class TransactionService implements ITransactionService {

@@ -15,8 +15,41 @@ export const CATEGORIES_QUERY = gql`
     categories {
       id
       name
+      description
+      icon
       color
       createdAt
+    }
+  }
+`;
+
+export const CATEGORY_STATS_QUERY = gql`
+  query CategoryStats {
+    categoryStats {
+      category {
+        id
+        name
+        description
+        icon
+        color
+      }
+      transactionCount
+      totalAmount
+    }
+  }
+`;
+
+export const CATEGORIES_OVERVIEW_QUERY = gql`
+  query CategoriesOverview {
+    categoriesOverview {
+      totalCategories
+      totalTransactions
+      mostUsed {
+        id
+        name
+        icon
+        color
+      }
     }
   }
 `;
@@ -32,6 +65,7 @@ export const TRANSACTIONS_QUERY = gql`
       category {
         id
         name
+        icon
         color
       }
     }

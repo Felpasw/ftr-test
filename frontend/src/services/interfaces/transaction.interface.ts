@@ -8,7 +8,7 @@ export type Transaction = {
   amount: number;
   type: TransactionType;
   date: string;
-  category: Pick<Category, "id" | "name" | "color"> | null;
+  category: Pick<Category, "id" | "name" | "icon" | "color"> | null;
 };
 
 export type TransactionsSummary = {

@@ -10,7 +10,9 @@ export type {
   User,
 } from "./interfaces/auth.interface";
 export type {
+  CategoriesOverview,
   Category,
+  CategoryStat,
   CreateCategoryInput,
   UpdateCategoryInput,
 } from "./interfaces/category.interface";

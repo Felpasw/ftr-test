@@ -1,140 +1,132 @@
 import { Link } from "react-router-dom";
 
-import { Button, Layout } from "../../../components";
-import { formatCurrency, formatDate } from "../../../utils/format";
-import type { TransactionType } from "../../../services/interfaces/transaction.interface";
+import { Layout } from "../../../components";
 
+import {
+  CategoryRow,
+  SummaryCard,
+  TransactionRow,
+} from "./components";
 import { DASHBOARD_MESSAGES, useDashboard } from "./hooks";
 
-type CardTone = "positive" | "negative" | "neutral";
+const WALLET_ICON = "/icons/wallet.svg";
+const CIRCLE_UP_ICON = "/icons/circle-arrow-up.svg";
+const CIRCLE_DOWN_ICON = "/icons/circle-arrow-down.svg";
+const CHEVRON_RIGHT_ICON = "/icons/chevron-right.svg";
+const PLUS_ICON = "/icons/plus.svg";
 
-const CARD_TONE: Record<CardTone, string> = {
-  positive: "text-emerald-600",
-  negative: "text-red-600",
-  neutral: "text-slate-900",
-};
-
-const AMOUNT_TONE: Record<TransactionType, string> = {
-  INCOME: "text-emerald-600",
-  EXPENSE: "text-red-600",
-};
-
-const AMOUNT_PREFIX: Record<TransactionType, string> = {
-  INCOME: "+",
-  EXPENSE: "-",
-};
-
-const pickBalanceTone = (balance: number): CardTone => {
-  if (balance > 0) return "positive";
-  if (balance < 0) return "negative";
-  return "neutral";
-};
-
-type SummaryCardProps = {
-  label: string;
-  value: number;
-  tone: CardTone;
-};
-
-function SummaryCard({ label, value, tone }: SummaryCardProps) {
+function SectionHeader({
+  title,
+  linkLabel,
+  linkTo,
+}: {
+  title: string;
+  linkLabel: string;
+  linkTo: string;
+}) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className={`mt-2 text-2xl font-semibold ${CARD_TONE[tone]}`}>
-        {formatCurrency(value)}
-      </p>
+    <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-5">
+      <span className="text-xs font-medium uppercase leading-4 tracking-[0.6px] text-[#6b7280]">
+        {title}
+      </span>
+      <Link
+        to={linkTo}
+        className="flex items-center gap-1 text-sm font-medium leading-5 text-[#1f6f43] hover:underline"
+      >
+        {linkLabel}
+        <img src={CHEVRON_RIGHT_ICON} alt="" className="size-5" />
+      </Link>
     </div>
   );
 }
 
 export function DashboardPage() {
-  const { summary, recent, isLoading } = useDashboard();
+  const { summary, recent, categoryStats, isLoading } = useDashboard();
 
   return (
     <Layout>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {DASHBOARD_MESSAGES.title}
-          </h1>
-          <p className="text-sm text-slate-500">
-            {DASHBOARD_MESSAGES.subtitle}
-          </p>
-        </div>
-        <Link to="/transactions">
-          <Button>{DASHBOARD_MESSAGES.newTransactionCta}</Button>
-        </Link>
-      </div>
-
-      <section className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-6">
         <SummaryCard
-          label={DASHBOARD_MESSAGES.summaryIncome}
-          value={summary.income}
-          tone="positive"
-        />
-        <SummaryCard
-          label={DASHBOARD_MESSAGES.summaryExpense}
-          value={summary.expense}
-          tone="negative"
-        />
-        <SummaryCard
+          iconSrc={WALLET_ICON}
           label={DASHBOARD_MESSAGES.summaryBalance}
           value={summary.balance}
-          tone={pickBalanceTone(summary.balance)}
         />
-      </section>
+        <SummaryCard
+          iconSrc={CIRCLE_UP_ICON}
+          label={DASHBOARD_MESSAGES.summaryIncome}
+          value={summary.income}
+        />
+        <SummaryCard
+          iconSrc={CIRCLE_DOWN_ICON}
+          label={DASHBOARD_MESSAGES.summaryExpense}
+          value={summary.expense}
+        />
 
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {DASHBOARD_MESSAGES.recentTitle}
-          </h2>
+        <section className="col-span-2 flex flex-col overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+          <SectionHeader
+            title={DASHBOARD_MESSAGES.recentTitle}
+            linkLabel={DASHBOARD_MESSAGES.recentSeeAll}
+            linkTo="/transactions"
+          />
+
+          <div className="flex flex-col">
+            {isLoading && recent.length === 0 ? (
+              <div className="px-6 py-10 text-center text-sm text-[#4b5563]">
+                {DASHBOARD_MESSAGES.loading}
+              </div>
+            ) : null}
+
+            {!isLoading && recent.length === 0 ? (
+              <div className="px-6 py-10 text-center text-sm text-[#4b5563]">
+                {DASHBOARD_MESSAGES.recentEmpty}
+              </div>
+            ) : null}
+
+            {recent.map((transaction) => (
+              <TransactionRow key={transaction.id} transaction={transaction} />
+            ))}
+          </div>
+
           <Link
             to="/transactions"
-            className="text-sm font-medium text-slate-900 underline"
+            className="flex items-center justify-center gap-1 border-t border-[#e5e7eb] px-6 py-5 text-sm font-medium leading-5 text-[#1f6f43] hover:underline"
           >
-            {DASHBOARD_MESSAGES.recentSeeAll}
+            <img src={PLUS_ICON} alt="" className="size-5" />
+            {DASHBOARD_MESSAGES.newTransaction}
           </Link>
-        </div>
+        </section>
 
-        {isLoading ? (
-          <p className="text-slate-500">{DASHBOARD_MESSAGES.loading}</p>
-        ) : null}
+        <section className="col-span-1 flex flex-col self-start overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+          <SectionHeader
+            title={DASHBOARD_MESSAGES.categoriesTitle}
+            linkLabel={DASHBOARD_MESSAGES.categoriesManage}
+            linkTo="/categories"
+          />
 
-        {!isLoading && recent.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="text-slate-600">{DASHBOARD_MESSAGES.emptyRecent}</p>
-          </div>
-        ) : null}
+          <div className="flex flex-col gap-5 p-6">
+            {isLoading && categoryStats.length === 0 ? (
+              <p className="text-center text-sm text-[#4b5563]">
+                {DASHBOARD_MESSAGES.loading}
+              </p>
+            ) : null}
 
-        {!isLoading && recent.length > 0 ? (
-          <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm">
-            {recent.map((transaction) => (
-              <li
-                key={transaction.id}
-                className="flex items-center justify-between px-5 py-4"
-              >
-                <div>
-                  <p className="font-medium text-slate-900">
-                    {transaction.title}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {transaction.category?.name ??
-                      DASHBOARD_MESSAGES.noCategory}{" "}
-                    · {formatDate(transaction.date)}
-                  </p>
-                </div>
-                <span
-                  className={`font-semibold ${AMOUNT_TONE[transaction.type]}`}
-                >
-                  {AMOUNT_PREFIX[transaction.type]}
-                  {formatCurrency(transaction.amount)}
-                </span>
-              </li>
+            {!isLoading && categoryStats.length === 0 ? (
+              <p className="text-center text-sm text-[#4b5563]">
+                {DASHBOARD_MESSAGES.categoriesEmpty}
+              </p>
+            ) : null}
+
+            {categoryStats.map((stat) => (
+              <CategoryRow
+                key={stat.category.id}
+                stat={stat}
+                itemLabel={DASHBOARD_MESSAGES.itemSuffix}
+                itemsLabel={DASHBOARD_MESSAGES.itemsSuffix}
+              />
             ))}
-          </ul>
-        ) : null}
-      </section>
+          </div>
+        </section>
+      </div>
     </Layout>
   );
 }

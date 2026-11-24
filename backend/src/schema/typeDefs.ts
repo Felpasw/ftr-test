@@ -20,9 +20,23 @@ export const typeDefs = /* GraphQL */ `
   type Category {
     id: ID!
     name: String!
+    description: String
+    icon: String
     color: String
     createdAt: DateTime!
     updatedAt: DateTime!
+  }
+
+  type CategoryStat {
+    category: Category!
+    transactionCount: Int!
+    totalAmount: Float!
+  }
+
+  type CategoriesOverview {
+    totalCategories: Int!
+    totalTransactions: Int!
+    mostUsed: Category
   }
 
   type Transaction {
@@ -55,11 +69,15 @@ export const typeDefs = /* GraphQL */ `
 
   input CreateCategoryInput {
     name: String!
+    description: String
+    icon: String
     color: String
   }
 
   input UpdateCategoryInput {
     name: String
+    description: String
+    icon: String
     color: String
   }
 
@@ -82,6 +100,8 @@ export const typeDefs = /* GraphQL */ `
   type Query {
     me: User
     categories: [Category!]!
+    categoryStats: [CategoryStat!]!
+    categoriesOverview: CategoriesOverview!
     category(id: ID!): Category
     transactions: [Transaction!]!
     transaction(id: ID!): Transaction

@@ -1,10 +1,16 @@
 import { Button, ControlledInput, Modal } from "../../../../components";
-import type { Category } from "../../../../services/interfaces/category.interface";
-import { CATEGORIES_MESSAGES, useCategoryForm } from "../hooks";
+
+import {
+  CATEGORIES_MESSAGES,
+  useCategoryForm,
+  type EditableCategory,
+} from "../hooks";
+import { CategoryColorPicker } from "./CategoryColorPicker";
+import { CategoryIconPicker } from "./CategoryIconPicker";
 
 type CategoryDialogProps = {
   open: boolean;
-  editing: Category | null;
+  editing: EditableCategory | null;
   onClose: () => void;
   onSuccess: () => void;
 };
@@ -29,28 +35,45 @@ export function CategoryDialog({
     : CATEGORIES_MESSAGES.dialogSave;
 
   return (
-    <Modal open={open} title={title} onClose={onClose}>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <ControlledInput
-          control={control}
-          name="name"
-          label={CATEGORIES_MESSAGES.dialogNameLabel}
-        />
-        <ControlledInput
-          control={control}
-          name="color"
-          type="color"
-          label={CATEGORIES_MESSAGES.dialogColorLabel}
-        />
+    <Modal
+      open={open}
+      title={title}
+      subtitle={CATEGORIES_MESSAGES.dialogSubtitle}
+      closeLabel={CATEGORIES_MESSAGES.dialogClose}
+      onClose={onClose}
+    >
+      <form onSubmit={onSubmit} className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <ControlledInput
+            control={control}
+            name="name"
+            label={CATEGORIES_MESSAGES.dialogTitleLabel}
+            placeholder={CATEGORIES_MESSAGES.dialogTitlePlaceholder}
+          />
+          <ControlledInput
+            control={control}
+            name="description"
+            label={CATEGORIES_MESSAGES.dialogDescriptionLabel}
+            placeholder={CATEGORIES_MESSAGES.dialogDescriptionPlaceholder}
+            hint={CATEGORIES_MESSAGES.dialogDescriptionHint}
+          />
 
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            {CATEGORIES_MESSAGES.dialogCancel}
-          </Button>
-          <Button type="submit" loading={isSaving}>
-            {saveLabel}
-          </Button>
+          <CategoryIconPicker
+            control={control}
+            name="icon"
+            label={CATEGORIES_MESSAGES.dialogIconLabel}
+          />
+
+          <CategoryColorPicker
+            control={control}
+            name="color"
+            label={CATEGORIES_MESSAGES.dialogColorLabel}
+          />
         </div>
+
+        <Button type="submit" loading={isSaving} fullWidth>
+          {saveLabel}
+        </Button>
       </form>
     </Modal>
   );

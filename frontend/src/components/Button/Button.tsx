@@ -8,14 +8,13 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   fullWidth?: boolean;
 };
 
-const VARIANTS: Record<Variant, string> = {
-  primary: "bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-400",
-  secondary:
-    "bg-white text-slate-900 border border-slate-300 hover:bg-slate-50 disabled:text-slate-400",
-  danger: "bg-red-600 text-white hover:bg-red-500 disabled:bg-red-300",
-  ghost:
-    "bg-transparent text-slate-700 hover:bg-slate-100 disabled:text-slate-400",
-};
+const BASE_CLASSES =
+  "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium leading-5 transition disabled:cursor-not-allowed " +
+  "data-[variant=primary]:bg-[#1f6f43] data-[variant=primary]:text-white hover:data-[variant=primary]:bg-[#1a5d39] disabled:data-[variant=primary]:bg-[#9ca3af] " +
+  "data-[variant=secondary]:border data-[variant=secondary]:border-[#d1d5db] data-[variant=secondary]:bg-white data-[variant=secondary]:text-[#374151] hover:data-[variant=secondary]:bg-[#f8f9fa] disabled:data-[variant=secondary]:text-[#9ca3af] " +
+  "data-[variant=danger]:bg-[#dc2626] data-[variant=danger]:text-white hover:data-[variant=danger]:bg-[#b91c1c] disabled:data-[variant=danger]:bg-[#fca5a5] " +
+  "data-[variant=ghost]:bg-transparent data-[variant=ghost]:text-[#374151] hover:data-[variant=ghost]:bg-[#f3f4f6] disabled:data-[variant=ghost]:text-[#9ca3af] " +
+  "data-[full-width=true]:w-full";
 
 export function Button({
   variant = "primary",
@@ -26,14 +25,13 @@ export function Button({
   children,
   ...rest
 }: ButtonProps) {
-  const widthClass = fullWidth ? "w-full" : "";
-  const isDisabled = disabled || loading;
-
   return (
     <button
       {...rest}
-      disabled={isDisabled}
-      className={`inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed ${VARIANTS[variant]} ${widthClass} ${className}`}
+      data-variant={variant}
+      data-full-width={fullWidth}
+      disabled={disabled || loading}
+      className={BASE_CLASSES + " " + className}
     >
       {children}
     </button>
